@@ -114,7 +114,7 @@ export default function QuranContent({
   
   return (
     <main 
-      className="relative h-[calc(100vh-128px)] overflow-y-auto p-4 transition-colors duration-300"
+      className="relative h-[calc(100vh-64px)] overflow-y-auto p-4 transition-colors duration-300"
       ref={scrollRef}
       dir="rtl"
     >

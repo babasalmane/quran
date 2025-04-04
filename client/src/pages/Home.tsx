@@ -4,7 +4,6 @@ import { PageWrapper } from "@/components/ui/layout";
 import Header from "@/components/Header";
 import NavigationDrawer from "@/components/NavigationDrawer";
 import QuranContent from "@/components/QuranContent";
-import BottomControls from "@/components/BottomControls";
 import SearchOverlay from "@/components/SearchOverlay";
 import SettingsPanel from "@/components/SettingsPanel";
 import { fetchAllSuras, fetchSura, fetchUserPreferences, updateUserPreferences } from "@/lib/quranAPI";
@@ -157,6 +156,9 @@ export default function Home() {
     return null;
   }
   
+  // Format the current position for display in the header
+  const currentPositionText = `الآية ${currentAyah}/${currentSuraData.ayahs.length}`;
+
   return (
     <PageWrapper className={`dark:bg-darkBg transition-colors duration-300`}>
       <Header 
@@ -165,6 +167,10 @@ export default function Home() {
         onSearchClick={() => setIsSearchOpen(true)}
         onBookmarkClick={() => setIsDrawerOpen(true)}
         onSettingsClick={() => setIsSettingsOpen(true)}
+        isAutoScrolling={isAutoScrolling}
+        onAutoScrollToggle={toggleAutoScroll}
+        currentSuraName={currentSuraData.name}
+        currentPosition={currentPositionText}
       />
       
       <NavigationDrawer 
@@ -196,24 +202,6 @@ export default function Home() {
         fontSize={fontSize}
         darkMode={darkMode}
         scrollRef={scrollRef}
-      />
-      
-      <BottomControls 
-        isAutoScrolling={isAutoScrolling}
-        scrollSpeed={scrollSpeed}
-        onAutoScrollToggle={toggleAutoScroll}
-        onScrollSpeedChange={(speed) => {
-          setScrollSpeed(speed);
-          setAutoScrollSpeed(speed);
-          // Don't need to save here since we'll save when the panel closes
-        }}
-        currentSura={currentSura}
-        totalSuras={suras.length}
-        currentAyah={currentAyah}
-        totalAyahs={currentSuraData.ayahs.length}
-        suraName={currentSuraData.name}
-        onPrevSura={handlePrevSura}
-        onNextSura={handleNextSura}
       />
     </PageWrapper>
   );
