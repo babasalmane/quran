@@ -81,8 +81,6 @@ export default function QuranContent({
     }
   };
   
-
-  
   const handleCopyVerse = (ayah: Ayah) => {
     navigator.clipboard.writeText(`${ayah.text}\n\n(${sura.name}, ${ayah.numberInSurah})`);
     toast({

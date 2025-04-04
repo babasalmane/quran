@@ -6,7 +6,7 @@ import NavigationDrawer from "@/components/NavigationDrawer";
 import QuranContent from "@/components/QuranContent";
 import SearchOverlay from "@/components/SearchOverlay";
 import SettingsPanel from "@/components/SettingsPanel";
-import { fetchAllSuras, fetchSura, fetchUserPreferences, updateUserPreferences } from "@/lib/quranAPI";
+import { fetchAllSuras, fetchSura, fetchUserPreferences, updateUserPreferences, createBookmark } from "@/lib/quranAPI";
 import { useAutoScroll } from "@/lib/useAutoScroll";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -56,6 +56,21 @@ export default function Home() {
     }>) => updateUserPreferences(prefs),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/preferences'] });
+    }
+  });
+  
+  const createBookmarkMutation = useMutation({
+    mutationFn: (bookmark: {
+      suraId: number;
+      ayahId: number;
+      note?: string;
+    }) => createBookmark(bookmark),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/bookmarks'] });
+      toast({
+        title: "تم إضافة الإشارة المرجعية",
+        description: "تمت إضافة الإشارة المرجعية بنجاح"
+      });
     }
   });
   
@@ -139,6 +154,15 @@ export default function Home() {
     setCurrentAyah(ayahId);
   };
   
+  const handleBookmark = () => {
+    // Create a bookmark for the current sura and ayah
+    createBookmarkMutation.mutate({
+      suraId: currentSura,
+      ayahId: currentAyah,
+      note: `${currentSuraData?.name} - آية ${currentAyah}`
+    });
+  };
+  
   // Render loading state
   if (isLoadingSura || isLoadingPreferences) {
     return (
@@ -165,7 +189,7 @@ export default function Home() {
         title="القرآن الكريم"
         onMenuClick={() => setIsDrawerOpen(true)}
         onSearchClick={() => setIsSearchOpen(true)}
-        onBookmarkClick={() => setIsDrawerOpen(true)}
+        onBookmarkClick={handleBookmark}
         onSettingsClick={() => setIsSettingsOpen(true)}
         isAutoScrolling={isAutoScrolling}
         onAutoScrollToggle={toggleAutoScroll}
