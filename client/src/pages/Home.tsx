@@ -143,8 +143,13 @@ export default function Home() {
   // Render loading state
   if (isLoadingSura || isLoadingPreferences) {
     return (
-      <PageWrapper className="flex items-center justify-center dark:bg-darkBg">
+      <PageWrapper className="flex flex-col items-center justify-center dark:bg-darkBg">
         <div className="text-center">
+          <img 
+            src="/assets/starter_1743799351855.jpg" 
+            alt="القرآن الكريم" 
+            className="w-64 h-64 object-contain mb-6 rounded-lg shadow-xl" 
+          />
           <div className="animate-spin inline-block w-8 h-8 border-4 border-primary border-t-transparent rounded-full mb-4"></div>
           <p className="text-lg text-primary dark:text-white">جاري تحميل القرآن الكريم...</p>
         </div>

@@ -78,8 +78,15 @@ export default function SettingsPanel({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-md" dir="rtl">
-        <DialogHeader>
-          <DialogTitle className="text-primary dark:text-white text-lg font-medium">الإعدادات</DialogTitle>
+        <DialogHeader className="pb-1">
+          <div className="flex flex-col items-center">
+            <DialogTitle className="text-primary dark:text-white text-lg font-medium">الإعدادات</DialogTitle>
+            <img 
+              src="/assets/list_bkg_1743799329321.png" 
+              alt="Separator" 
+              className="h-2 w-24 mt-1 opacity-70" 
+            />
+          </div>
           <DialogClose className="absolute right-4 top-4 text-gray-500" asChild>
             <Button variant="ghost" size="icon">
               <X size={18} />
@@ -146,8 +153,11 @@ export default function SettingsPanel({
           <Button variant="outline" className="mr-2" onClick={onClose}>
             إلغاء
           </Button>
-          <Button onClick={handleSave}>
-            حفظ
+          <Button 
+            onClick={handleSave}
+            className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700"
+          >
+            حفظ الإعدادات
           </Button>
         </div>
       </DialogContent>

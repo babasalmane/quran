@@ -27,9 +27,16 @@ export default function Header({
         >
           <Menu size={24} />
         </Button>
-        <h1 className="text-primary dark:text-white font-medium mr-4 text-xl">
-          {title}
-        </h1>
+        <div className="flex items-center">
+          <img 
+            src="/assets/icon_1743799431115.png" 
+            alt="Quran Icon" 
+            className="w-8 h-8 ml-2 mr-2" 
+          />
+          <h1 className="text-primary dark:text-white font-medium mr-4 text-xl">
+            {title}
+          </h1>
+        </div>
       </div>
       <div className="flex items-center">
         <Button
