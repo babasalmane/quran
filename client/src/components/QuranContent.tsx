@@ -105,7 +105,7 @@ export default function QuranContent({
   };
   
   const handleCopyVerse = (ayah: Ayah) => {
-    navigator.clipboard.writeText(`${ayah.text}\n\n${ayah.translation}\n\n(${sura.name}, ${ayah.numberInSurah})`);
+    navigator.clipboard.writeText(`${ayah.text}\n\n(${sura.name}, ${ayah.numberInSurah})`);
     toast({
       title: "تم النسخ",
       description: "تم نسخ الآية إلى الحافظة"
@@ -151,7 +151,7 @@ export default function QuranContent({
               >
                 {ayah.text}
                 <span 
-                  className="verse-number inline-flex mx-1 bg-primary text-white px-2 rounded-full text-sm align-middle cursor-pointer"
+                  className="verse-number inline-flex mx-1 bg-primary text-white px-1 rounded-full text-xs align-middle cursor-pointer"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleVerseClick(ayah.numberInSurah);

@@ -140,15 +140,13 @@ function parseQuranText(text) {
     let totalAyahNumber = i > 0 ? suras.reduce((sum, s, idx) => idx < i ? sum + s.ayahs.length : sum, 0) + 1 : 1;
     
     for (let j = 0; j < verses.length; j++) {
-      // Create simple translation for now - we'll improve this later
-      const translation = `Translation of verse ${j + 1}`;
-      
+      // Empty translation as we're using only the Arabic text
       ayahs.push({
         number: totalAyahNumber,
         text: verses[j],
-        translation: translation,
+        translation: "", // No translation
         numberInSurah: ayahNumber,
-        juz: Math.ceil((i + 1) / 10), // Simple juz calculation
+        juz: Math.ceil((i + 1) / 10), // Simple juz calculation 
         sajda: false, // Default, we'd need separate data for prostration verses
       });
       
