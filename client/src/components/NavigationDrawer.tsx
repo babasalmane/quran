@@ -75,14 +75,7 @@ export default function NavigationDrawer({
       dir="rtl"
     >
       <div className="drawer-header bg-primary text-white p-4 flex justify-between items-center">
-        <div className="flex flex-col items-center">
-          <h2 className="text-xl font-medium">السور</h2>
-          <img 
-            src="/assets/list_bkg_1743799329321.png" 
-            alt="Separator" 
-            className="h-2 w-24 mt-1 opacity-80" 
-          />
-        </div>
+        <h2 className="text-xl font-medium">السور</h2>
         <Button variant="ghost" size="icon" className="text-white" onClick={onClose}>
           <X size={24} />
         </Button>
@@ -118,16 +111,9 @@ export default function NavigationDrawer({
       
       {bookmarks.length > 0 && (
         <div className="bookmark-section p-4 border-t border-gray-200 dark:border-gray-800">
-          <div className="flex flex-col items-start mb-3">
-            <div className="flex items-center mb-1">
-              <Bookmark size={18} className="text-primary" />
-              <h3 className="text-primary dark:text-white font-medium mr-2">العلامات المرجعية</h3>
-            </div>
-            <img 
-              src="/assets/list_bkg_1743799329321.png" 
-              alt="Separator" 
-              className="h-2 w-20 opacity-70" 
-            />
+          <div className="flex items-center mb-2">
+            <Bookmark size={18} className="text-primary" />
+            <h3 className="text-primary dark:text-white font-medium mr-2">العلامات المرجعية</h3>
           </div>
           
           <div className="space-y-2">

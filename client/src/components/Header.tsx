@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, MoreVertical } from "lucide-react";
+import { Menu, Search, Bookmark, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface HeaderProps {
@@ -17,23 +17,44 @@ export default function Header({
   onSettingsClick
 }: HeaderProps) {
   return (
-    <header className="bg-black text-white flex items-center justify-between px-4 py-3 sticky top-0 z-20">
+    <header className="bg-white dark:bg-[#1A1A1A] shadow-md flex items-center justify-between px-4 py-3 sticky top-0 z-20 transition-colors">
       <div className="flex items-center">
-        <span className="text-sm">ج ١ | ج ١</span>
-      </div>
-      <div className="flex items-center space-x-6">
-        <span className="text-sm">استماع</span>
-        <span className="text-sm">التالي</span>
-        <span className="text-sm">السابق</span>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-primary"
+          onClick={onMenuClick}
+        >
+          <Menu size={24} />
+        </Button>
+        <h1 className="text-primary dark:text-white font-medium mr-4 text-xl">
+          {title}
+        </h1>
       </div>
       <div className="flex items-center">
         <Button
           variant="ghost"
           size="icon"
-          className="text-white"
+          className="text-primary dark:text-white"
+          onClick={onSearchClick}
+        >
+          <Search size={22} />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-primary dark:text-white"
+          onClick={onBookmarkClick}
+        >
+          <Bookmark size={22} />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-primary dark:text-white"
           onClick={onSettingsClick}
         >
-          <MoreVertical size={20} />
+          <Settings size={22} />
         </Button>
       </div>
     </header>
