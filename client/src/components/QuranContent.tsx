@@ -1,12 +1,9 @@
 import { useRef, useEffect, useState } from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { MoreVertical, Book } from "lucide-react";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { ChevronLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { type Sura, type Ayah, createBookmark } from "@/lib/quranAPI";
 import { queryClient } from "@/lib/queryClient";
-import { toArabicNumeral } from "@shared/quranData";
 
 interface QuranContentProps {
   sura: Sura;
@@ -27,9 +24,9 @@ export default function QuranContent({
   darkMode,
   scrollRef
 }: QuranContentProps) {
-  const verseRefs = useRef<Record<number, HTMLSpanElement | null>>({});
+  const verseRefs = useRef<Record<number, HTMLParagraphElement | null>>({});
   const { toast } = useToast();
-  const [scrollIndicatorStyle, setScrollIndicatorStyle] = useState({ height: '15%', top: '0%' });
+  const [currentPage, setCurrentPage] = useState(1);
   
   // Font size classes based on fontSize value (1-5)
   const fontSizeClasses = [
@@ -49,32 +46,6 @@ export default function QuranContent({
       });
     }
   }, [currentAyah]);
-  
-  useEffect(() => {
-    const updateScrollIndicator = () => {
-      if (!scrollRef.current) return;
-      
-      const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
-      const scrollPercentage = (scrollTop / (scrollHeight - clientHeight)) * 100;
-      const indicatorHeight = Math.min(30, Math.max(10, 100 / (scrollHeight / clientHeight)));
-      
-      setScrollIndicatorStyle({
-        height: `${indicatorHeight}%`,
-        top: `${(scrollPercentage * (100 - indicatorHeight)) / 100}%`
-      });
-    };
-    
-    const scrollElement = scrollRef.current;
-    if (scrollElement) {
-      scrollElement.addEventListener('scroll', updateScrollIndicator);
-      // Initialize
-      updateScrollIndicator();
-      
-      return () => {
-        scrollElement.removeEventListener('scroll', updateScrollIndicator);
-      };
-    }
-  }, [scrollRef]);
   
   const handleVerseClick = (ayahNumber: number) => {
     if (!isAutoScrolling) {
@@ -114,90 +85,48 @@ export default function QuranContent({
   
   return (
     <main 
-      className="relative h-[calc(100vh-128px)] overflow-y-auto p-4 transition-colors duration-300"
+      className="h-[calc(100vh-9rem)] overflow-y-auto"
       ref={scrollRef}
       dir="rtl"
     >
-      <div 
-        className="scroll-indicator absolute right-0 w-1 bg-primary transition-all duration-300"
-        style={{ height: scrollIndicatorStyle.height, top: scrollIndicatorStyle.top }}
-      />
-      
-      <div className="sura-header mb-6 text-center">
-        <div className="sura-bismillah mb-4">
-          <p className="font-[Amiri] text-2xl dark:text-white">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p>
+      {/* Sura title in rounded pill */}
+      <div className="px-4 py-6">
+        <div className="sura-title bg-white rounded-full border border-gray-300 shadow-sm mx-auto max-w-md py-3 px-6 text-center mb-4">
+          <h2 className="font-[Amiri] text-xl font-bold">
+            {sura.name}
+          </h2>
         </div>
-        <h2 className="font-[Amiri] text-2xl font-bold text-primary dark:text-white mb-1">
-          سورة {sura.name}
-        </h2>
-        <p className="text-gray-600 dark:text-gray-400">
-          {sura.englishName} ({sura.englishNameTranslation}) - {sura.totalAyahs} Verses
-        </p>
+      
+        {/* Bismillah */}
+        <div className="bismillah text-center mb-6">
+          <p className="font-[Amiri] text-2xl">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p>
+        </div>
+        
+        {/* Verses with parentheses for numbers */}
+        <div className="verses space-y-6 text-center">
+          {sura.ayahs.map((ayah) => (
+            <p 
+              key={ayah.numberInSurah}
+              ref={el => verseRefs.current[ayah.numberInSurah] = el}
+              className={`font-[Amiri] ${fontSizeClasses[fontSize - 1]} text-center leading-relaxed mb-2`}
+              onClick={() => handleVerseClick(ayah.numberInSurah)}
+            >
+              {ayah.text} ({ayah.numberInSurah})
+            </p>
+          ))}
+        </div>
+        
+        {/* Page counter */}
+        <div className="page-counter text-center text-gray-500 mt-4 mb-8">
+          <p className="text-sm">الصفحة ({currentPage})</p>  
+        </div>
       </div>
       
-      <div className="verses-container max-w-3xl mx-auto">
-        {/* Book-style continuous text with inline verse numbers */}
-        <div className="quran-page p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm mb-6">
-          <p className={`font-[Amiri] ${fontSizeClasses[fontSize - 1]} leading-loose text-justify dark:text-white`}>
-            {sura.ayahs.map((ayah, index) => (
-              <span 
-                key={ayah.numberInSurah}
-                id={`verse-${ayah.numberInSurah}`}
-                ref={el => verseRefs.current[ayah.numberInSurah] = el}
-                className={`verse-inline inline ${
-                  currentAyah === ayah.numberInSurah ? "bg-amber-50 dark:bg-amber-900/30 rounded-md px-1" : ""
-                }`}
-                onClick={() => handleVerseClick(ayah.numberInSurah)}
-              >
-                {ayah.text}
-                <span 
-                  className="verse-number inline-flex mx-1 bg-primary text-white px-1 rounded-full text-xs align-middle cursor-pointer"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleVerseClick(ayah.numberInSurah);
-                  }}
-                >
-                  {ayah.numberInSurah}
-                </span>
-                {" "}
-              </span>
-            ))}
-          </p>
-        </div>
-        
-        {/* Verse actions panel */}
-        <div className="verse-actions bg-gray-50 dark:bg-gray-700 p-4 rounded-lg mb-6">
-          <div className="flex justify-between items-center">
-            <div className="flex gap-2 items-center">
-              <span className="text-gray-600 dark:text-gray-300">الآية الحالية:</span>
-              <span className="font-bold text-primary">{currentAyah}</span>
-            </div>
-            
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={() => handleAddBookmark(currentAyah)}>
-                إضافة إشارة مرجعية
-              </Button>
-              
-              <Button 
-                size="sm" 
-                variant="outline" 
-                onClick={() => {
-                  const ayah = sura.ayahs.find(a => a.numberInSurah === currentAyah);
-                  if (ayah) handleCopyVerse(ayah);
-                }}
-              >
-                نسخ الآية
-              </Button>
-            </div>
-          </div>
-        </div>
-        
-        <div className="end-of-sura text-center my-12">
-          <div className="inline-block mx-auto bg-amber-100 dark:bg-amber-900/30 p-2 rounded-md">
-            <Book className="mx-auto text-primary mb-1" size={24} />
-            <p className="text-primary text-sm font-medium">نهاية السورة</p>
-          </div>
-        </div>
+      {/* Bottom navigation */}
+      <div className="bottom-navigation fixed bottom-0 left-0 right-0 flex justify-center items-center space-x-8 py-2 bg-white border-t border-gray-200">
+        <ChevronLeft size={20} className="text-gray-400" />
+        <div className="w-3 h-3 rounded-full bg-gray-300"></div>
+        <div className="w-4 h-4 border border-gray-300"></div>
       </div>
     </main>
   );
