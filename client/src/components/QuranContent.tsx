@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { MoreVertical, Book } from "lucide-react";
+import { MoreVertical, Book, ChevronRight, ArrowRight } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { type Sura, type Ayah } from "@/lib/quranAPI";
@@ -14,6 +14,7 @@ interface QuranContentProps {
   fontSize: number;
   darkMode: boolean;
   scrollRef: React.RefObject<HTMLDivElement>;
+  onNextSura?: () => void;
 }
 
 export default function QuranContent({
@@ -23,7 +24,8 @@ export default function QuranContent({
   isAutoScrolling,
   fontSize,
   darkMode,
-  scrollRef
+  scrollRef,
+  onNextSura
 }: QuranContentProps) {
   const verseRefs = useRef<Record<number, HTMLSpanElement | null>>({});
   const { toast } = useToast();
@@ -142,10 +144,13 @@ export default function QuranContent({
         </div>
         
         <div className="end-of-sura text-center my-12">
-          <div className="inline-block mx-auto bg-amber-100 dark:bg-amber-900/30 p-2 rounded-md">
-            <Book className="mx-auto text-primary mb-1" size={24} />
-            <p className="text-primary text-sm font-medium">نهاية السورة</p>
-          </div>
+          <Button
+            onClick={onNextSura}
+            className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-md mx-auto"
+          >
+            <span className="font-[Amiri] font-medium">السورة التالية</span>
+            <ArrowRight size={18} />
+          </Button>
         </div>
       </div>
     </main>

@@ -226,6 +226,7 @@ export default function Home() {
         fontSize={fontSize}
         darkMode={darkMode}
         scrollRef={scrollRef}
+        onNextSura={handleNextSura}
       />
     </PageWrapper>
   );
