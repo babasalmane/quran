@@ -4,7 +4,6 @@ const config: CapacitorConfig = {
   appId: 'com.quranreader.app',
   appName: 'Quran Reader',
   webDir: 'client/dist',
-  bundledWebRuntime: false,
   server: {
     androidScheme: 'https'
   },

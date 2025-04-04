@@ -3,11 +3,10 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
 import { insertUserPreferencesSchema, insertBookmarkSchema } from "@shared/schema";
-import { getQuranMetadata, QuranData } from "@shared/quranData";
 
 // Use the actual Quran data imported from shared/quranData.ts
 // which was generated from the harakat file
-import { quranData } from "@shared/quranData";
+import { quranData, suraMetadata } from "@shared/quranData";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // put application routes here
@@ -15,15 +14,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Get all suras metadata (for the navigation drawer)
   app.get("/api/quran/suras", (req: Request, res: Response) => {
-    const suras = quranData.suras.map(sura => ({
-      number: sura.number,
-      name: sura.name,
-      englishName: sura.englishName,
-      englishNameTranslation: sura.englishNameTranslation,
-      totalAyahs: sura.ayahs.length
-    }));
-    
-    res.json({ suras });
+    res.json({ suras: suraMetadata });
   });
 
   // Get a specific sura by number
@@ -34,7 +25,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(400).json({ message: "Invalid sura number" });
     }
     
-    const sura = quranData.suras.find(s => s.number === suraNumber);
+    const sura = quranData.find(s => s.number === suraNumber);
     
     if (!sura) {
       return res.status(404).json({ message: "Sura not found" });
@@ -166,11 +157,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const results: any[] = [];
     
     // Search in all suras and ayahs
-    quranData.suras.forEach(sura => {
-      sura.ayahs.forEach(ayah => {
+    quranData.forEach((sura) => {
+      sura.ayahs.forEach((ayah) => {
         if (
           ayah.text.includes(query) || 
-          ayah.translation.toLowerCase().includes(query.toLowerCase())
+          (ayah.translation && ayah.translation.toLowerCase().includes(query.toLowerCase()))
         ) {
           results.push({
             sura: {
@@ -182,7 +173,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               number: ayah.number,
               numberInSurah: ayah.numberInSurah,
               text: ayah.text,
-              translation: ayah.translation
+              translation: ayah.translation || ""
             }
           });
         }
