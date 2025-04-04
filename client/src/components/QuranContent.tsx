@@ -27,7 +27,7 @@ export default function QuranContent({
   darkMode,
   scrollRef
 }: QuranContentProps) {
-  const verseRefs = useRef<Record<number, HTMLDivElement | null>>({});
+  const verseRefs = useRef<Record<number, HTMLSpanElement | null>>({});
   const { toast } = useToast();
   const [scrollIndicatorStyle, setScrollIndicatorStyle] = useState({ height: '15%', top: '0%' });
   
@@ -157,7 +157,7 @@ export default function QuranContent({
                     handleVerseClick(ayah.numberInSurah);
                   }}
                 >
-                  {toArabicNumeral(ayah.numberInSurah)}
+                  {ayah.numberInSurah}
                 </span>
                 {" "}
               </span>
@@ -170,7 +170,7 @@ export default function QuranContent({
           <div className="flex justify-between items-center">
             <div className="flex gap-2 items-center">
               <span className="text-gray-600 dark:text-gray-300">الآية الحالية:</span>
-              <span className="font-bold text-primary">{toArabicNumeral(currentAyah)}</span>
+              <span className="font-bold text-primary">{currentAyah}</span>
             </div>
             
             <div className="flex gap-2">
