@@ -136,46 +136,61 @@ export default function QuranContent({
       </div>
       
       <div className="verses-container max-w-3xl mx-auto">
-        {sura.ayahs.map((ayah) => (
-          <div 
-            key={ayah.numberInSurah}
-            id={`verse-${ayah.numberInSurah}`}
-            ref={el => verseRefs.current[ayah.numberInSurah] = el}
-            className={`verse mb-6 p-2 rounded-md transition-colors ${
-              currentAyah === ayah.numberInSurah ? "bg-gray-50 dark:bg-gray-800" : ""
-            } hover:bg-gray-50 dark:hover:bg-gray-800`}
-            onClick={() => handleVerseClick(ayah.numberInSurah)}
-          >
-            <div className="flex justify-between items-center mb-2">
-              <span className="verse-number bg-primary text-white w-8 h-8 flex items-center justify-center rounded-full text-sm">
-                {toArabicNumeral(ayah.numberInSurah)}
+        {/* Book-style continuous text with inline verse numbers */}
+        <div className="quran-page p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm mb-6">
+          <p className={`font-[Amiri] ${fontSizeClasses[fontSize - 1]} leading-loose text-justify dark:text-white`}>
+            {sura.ayahs.map((ayah, index) => (
+              <span 
+                key={ayah.numberInSurah}
+                id={`verse-${ayah.numberInSurah}`}
+                ref={el => verseRefs.current[ayah.numberInSurah] = el}
+                className={`verse-inline inline ${
+                  currentAyah === ayah.numberInSurah ? "bg-amber-50 dark:bg-amber-900/30 rounded-md px-1" : ""
+                }`}
+                onClick={() => handleVerseClick(ayah.numberInSurah)}
+              >
+                {ayah.text}
+                <span 
+                  className="verse-number inline-flex mx-1 bg-primary text-white px-2 rounded-full text-sm align-middle cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleVerseClick(ayah.numberInSurah);
+                  }}
+                >
+                  {toArabicNumeral(ayah.numberInSurah)}
+                </span>
+                {" "}
               </span>
-              
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="text-gray-400 hover:text-primary" onClick={e => e.stopPropagation()}>
-                    <MoreVertical size={20} />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => handleAddBookmark(ayah.numberInSurah)}>
-                    إضافة إشارة مرجعية
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleCopyVerse(ayah)}>
-                    نسخ الآية
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+            ))}
+          </p>
+        </div>
+        
+        {/* Verse actions panel */}
+        <div className="verse-actions bg-gray-50 dark:bg-gray-700 p-4 rounded-lg mb-6">
+          <div className="flex justify-between items-center">
+            <div className="flex gap-2 items-center">
+              <span className="text-gray-600 dark:text-gray-300">الآية الحالية:</span>
+              <span className="font-bold text-primary">{toArabicNumeral(currentAyah)}</span>
             </div>
             
-            <p className={`font-[Amiri] ${fontSizeClasses[fontSize - 1]} leading-loose mb-2 dark:text-white`}>
-              {ayah.text}
-            </p>
-            <p className="translation text-gray-600 dark:text-gray-400 text-base">
-              {ayah.translation}
-            </p>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => handleAddBookmark(currentAyah)}>
+                إضافة إشارة مرجعية
+              </Button>
+              
+              <Button 
+                size="sm" 
+                variant="outline" 
+                onClick={() => {
+                  const ayah = sura.ayahs.find(a => a.numberInSurah === currentAyah);
+                  if (ayah) handleCopyVerse(ayah);
+                }}
+              >
+                نسخ الآية
+              </Button>
+            </div>
           </div>
-        ))}
+        </div>
         
         <div className="end-of-sura text-center my-12">
           <div className="inline-block mx-auto bg-amber-100 dark:bg-amber-900/30 p-2 rounded-md">
