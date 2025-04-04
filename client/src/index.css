@@ -11,3 +11,10 @@
     @apply font-sans antialiased bg-background text-foreground;
   }
 }
+
+/* Utility for when Do Not Disturb mode is enabled */
+.do-not-disturb-active .notification {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transition: opacity 0.5s, visibility 0.5s;
+}

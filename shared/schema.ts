@@ -16,6 +16,7 @@ export const userPreferences = pgTable("user_preferences", {
   fontSize: integer("font_size").notNull().default(3),
   scrollSpeed: integer("scroll_speed").notNull().default(5),
   darkMode: boolean("dark_mode").notNull().default(false),
+  doNotDisturb: boolean("do_not_disturb").notNull().default(false),
 });
 
 export const bookmarks = pgTable("bookmarks", {
@@ -39,6 +40,7 @@ export const insertUserPreferencesSchema = createInsertSchema(userPreferences).p
   fontSize: true,
   scrollSpeed: true,
   darkMode: true,
+  doNotDisturb: true,
 });
 
 export const insertBookmarkSchema = createInsertSchema(bookmarks).pick({

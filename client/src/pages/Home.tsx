@@ -21,6 +21,7 @@ export default function Home() {
   const [darkMode, setDarkMode] = useState(false);
   const [fontSize, setFontSize] = useState(3);
   const [scrollSpeed, setScrollSpeed] = useState(5);
+  const [doNotDisturb, setDoNotDisturb] = useState(false);
   
   // Refs
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -53,6 +54,7 @@ export default function Home() {
       fontSize: number;
       scrollSpeed: number;
       darkMode: boolean;
+      doNotDisturb: boolean;
     }>) => updateUserPreferences(prefs),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/preferences'] });
@@ -83,6 +85,7 @@ export default function Home() {
       setFontSize(preferences.fontSize);
       setScrollSpeed(preferences.scrollSpeed);
       setDarkMode(preferences.darkMode);
+      setDoNotDisturb(preferences.doNotDisturb);
       setAutoScrollSpeed(preferences.scrollSpeed);
       
       // Apply dark mode
@@ -113,6 +116,15 @@ export default function Home() {
     }
   }, [darkMode]);
   
+  // Apply do-not-disturb mode when it changes
+  useEffect(() => {
+    if (doNotDisturb) {
+      document.body.classList.add('do-not-disturb-active');
+    } else {
+      document.body.classList.remove('do-not-disturb-active');
+    }
+  }, [doNotDisturb]);
+  
   // Handlers
   const handleSuraSelect = (suraNumber: number) => {
     setCurrentSura(suraNumber);
@@ -123,6 +135,7 @@ export default function Home() {
     darkMode: boolean;
     fontSize: number;
     scrollSpeed: number;
+    doNotDisturb: boolean;
   }>) => {
     if (newSettings.darkMode !== undefined) setDarkMode(newSettings.darkMode);
     if (newSettings.fontSize !== undefined) setFontSize(newSettings.fontSize);
@@ -130,6 +143,7 @@ export default function Home() {
       setScrollSpeed(newSettings.scrollSpeed);
       setAutoScrollSpeed(newSettings.scrollSpeed);
     }
+    if (newSettings.doNotDisturb !== undefined) setDoNotDisturb(newSettings.doNotDisturb);
     
     // Save to server
     updatePreferencesMutation.mutate(newSettings);
@@ -214,7 +228,7 @@ export default function Home() {
       <SettingsPanel 
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
-        settings={{ darkMode, fontSize, scrollSpeed }}
+        settings={{ darkMode, fontSize, scrollSpeed, doNotDisturb }}
         onSettingsChange={handleSettingsChange}
       />
       

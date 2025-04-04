@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { X, Type, Moon, Sun, Clock } from "lucide-react";
+import { X, Type, Moon, Sun, Clock, BellOff } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { updateUserPreferences } from "@/lib/quranAPI";
 import { queryClient } from "@/lib/queryClient";
@@ -21,11 +21,13 @@ interface SettingsPanelProps {
     darkMode: boolean;
     fontSize: number;
     scrollSpeed: number;
+    doNotDisturb: boolean;
   };
   onSettingsChange: (settings: Partial<{
     darkMode: boolean;
     fontSize: number;
     scrollSpeed: number;
+    doNotDisturb: boolean;
   }>) => void;
 }
 
@@ -42,16 +44,18 @@ export default function SettingsPanel({
     setLocalSettings(settings);
   }, [settings, isOpen]);
   
-  const handleSave = async () => {
+  // Auto-save changes
+  const saveChanges = async (updatedSettings: typeof localSettings) => {
     // Update settings in parent component immediately for responsive UI
-    onSettingsChange(localSettings);
+    onSettingsChange(updatedSettings);
     
     // Save to server
     try {
       await updateUserPreferences({
-        fontSize: localSettings.fontSize,
-        scrollSpeed: localSettings.scrollSpeed,
-        darkMode: localSettings.darkMode
+        fontSize: updatedSettings.fontSize,
+        scrollSpeed: updatedSettings.scrollSpeed,
+        darkMode: updatedSettings.darkMode,
+        doNotDisturb: updatedSettings.doNotDisturb
       });
       
       // Invalidate preferences cache
@@ -59,20 +63,30 @@ export default function SettingsPanel({
     } catch (error) {
       console.error("Failed to save settings:", error);
     }
-    
-    onClose();
   };
   
   const handleDarkModeToggle = (checked: boolean) => {
-    setLocalSettings(prev => ({ ...prev, darkMode: checked }));
+    const updatedSettings = { ...localSettings, darkMode: checked };
+    setLocalSettings(updatedSettings);
+    saveChanges(updatedSettings);
+  };
+  
+  const handleDoNotDisturbToggle = (checked: boolean) => {
+    const updatedSettings = { ...localSettings, doNotDisturb: checked };
+    setLocalSettings(updatedSettings);
+    saveChanges(updatedSettings);
   };
   
   const handleFontSizeChange = (value: number[]) => {
-    setLocalSettings(prev => ({ ...prev, fontSize: value[0] }));
+    const updatedSettings = { ...localSettings, fontSize: value[0] };
+    setLocalSettings(updatedSettings);
+    saveChanges(updatedSettings);
   };
   
   const handleScrollSpeedChange = (value: number[]) => {
-    setLocalSettings(prev => ({ ...prev, scrollSpeed: value[0] }));
+    const updatedSettings = { ...localSettings, scrollSpeed: value[0] };
+    setLocalSettings(updatedSettings);
+    saveChanges(updatedSettings);
   };
   
   return (
@@ -100,6 +114,17 @@ export default function SettingsPanel({
             <Switch 
               checked={localSettings.darkMode} 
               onCheckedChange={handleDarkModeToggle}
+            />
+          </div>
+          
+          <div className="flex justify-between items-center">
+            <div className="flex items-center">
+              <BellOff size={20} className="text-red-500 mr-2" />
+              <Label>عدم الإزعاج</Label>
+            </div>
+            <Switch 
+              checked={localSettings.doNotDisturb} 
+              onCheckedChange={handleDoNotDisturbToggle}
             />
           </div>
           
@@ -140,15 +165,6 @@ export default function SettingsPanel({
               <span>سريع</span>
             </div>
           </div>
-        </div>
-        
-        <div className="flex justify-end">
-          <Button variant="outline" className="mr-2" onClick={onClose}>
-            إلغاء
-          </Button>
-          <Button onClick={handleSave}>
-            حفظ
-          </Button>
         </div>
       </DialogContent>
     </Dialog>

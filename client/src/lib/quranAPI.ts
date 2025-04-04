@@ -36,6 +36,7 @@ export interface QuranPreferences {
   fontSize: number;
   scrollSpeed: number;
   darkMode: boolean;
+  doNotDisturb: boolean;
 }
 
 export interface Bookmark {

@@ -51,7 +51,8 @@ export class MemStorage implements IStorage {
           currentAyah: 1,
           fontSize: 3,
           scrollSpeed: 5,
-          darkMode: false
+          darkMode: false,
+          doNotDisturb: false
         });
       })
       .catch(err => console.error("Failed to create default user:", err));
@@ -94,7 +95,8 @@ export class MemStorage implements IStorage {
       currentAyah: prefs.currentAyah ?? 1,
       fontSize: prefs.fontSize ?? 3,
       scrollSpeed: prefs.scrollSpeed ?? 5,
-      darkMode: prefs.darkMode ?? false
+      darkMode: prefs.darkMode ?? false,
+      doNotDisturb: prefs.doNotDisturb ?? false
     };
     
     this.userPreferences.set(id, newPrefs);
@@ -117,7 +119,8 @@ export class MemStorage implements IStorage {
       currentAyah: updates.currentAyah ?? prefToUpdate.currentAyah,
       fontSize: updates.fontSize ?? prefToUpdate.fontSize,
       scrollSpeed: updates.scrollSpeed ?? prefToUpdate.scrollSpeed,
-      darkMode: updates.darkMode ?? prefToUpdate.darkMode
+      darkMode: updates.darkMode ?? prefToUpdate.darkMode,
+      doNotDisturb: updates.doNotDisturb ?? prefToUpdate.doNotDisturb
     };
     
     this.userPreferences.set(prefToUpdate.id, updatedPrefs);
