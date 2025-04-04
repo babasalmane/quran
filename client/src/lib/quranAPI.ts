@@ -63,28 +63,19 @@ export interface SearchResult {
 
 // API functions
 export async function fetchAllSuras(): Promise<SuraMetadata[]> {
-  const response = await fetch('/api/quran/suras');
-  if (!response.ok) {
-    throw new Error('Failed to fetch suras');
-  }
+  const response = await apiRequest('GET', '/api/quran/suras', undefined);
   const data = await response.json();
   return data.suras;
 }
 
 export async function fetchSura(suraNumber: number): Promise<Sura> {
-  const response = await fetch(`/api/quran/suras/${suraNumber}`);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch sura ${suraNumber}`);
-  }
+  const response = await apiRequest('GET', `/api/quran/suras/${suraNumber}`, undefined);
   const data = await response.json();
   return data.sura;
 }
 
 export async function fetchUserPreferences(): Promise<QuranPreferences> {
-  const response = await fetch('/api/preferences');
-  if (!response.ok) {
-    throw new Error('Failed to fetch user preferences');
-  }
+  const response = await apiRequest('GET', '/api/preferences', undefined);
   const data = await response.json();
   return data.preferences;
 }
@@ -96,10 +87,7 @@ export async function updateUserPreferences(preferences: Partial<QuranPreference
 }
 
 export async function fetchBookmarks(): Promise<Bookmark[]> {
-  const response = await fetch('/api/bookmarks');
-  if (!response.ok) {
-    throw new Error('Failed to fetch bookmarks');
-  }
+  const response = await apiRequest('GET', '/api/bookmarks', undefined);
   const data = await response.json();
   return data.bookmarks;
 }
@@ -109,13 +97,8 @@ export async function createBookmark(bookmark: {
   ayahId: number;
   note?: string;
 }): Promise<Bookmark> {
-  const bookmarkData = {
-    ...bookmark,
-    userId: 1, // For demo purposes
-    createdAt: new Date().toISOString(),
-  };
-  
-  const response = await apiRequest('POST', '/api/bookmarks', bookmarkData);
+  // No need to add userId or createdAt as the server will add them
+  const response = await apiRequest('POST', '/api/bookmarks', bookmark);
   const data = await response.json();
   return data.bookmark;
 }

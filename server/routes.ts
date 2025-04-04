@@ -88,13 +88,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const userId = 1;
     
     try {
-      const updateSchema = insertUserPreferencesSchema.partial().extend({
-        userId: z.literal(userId)
-      });
+      // Create a schema that makes all fields optional except userId
+      const updateSchema = insertUserPreferencesSchema.omit({ userId: true }).partial();
       
+      // Validate the data from the request
       const validatedData = updateSchema.parse(req.body);
       
-      const updatedPreferences = await storage.updateUserPreferences(userId, validatedData);
+      // Add the userId
+      const dataWithUserId = { ...validatedData, userId };
+      
+      // Update preferences
+      const updatedPreferences = await storage.updateUserPreferences(userId, dataWithUserId);
       
       if (!updatedPreferences) {
         return res.status(404).json({ message: "Preferences not found" });
@@ -102,6 +106,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({ preferences: updatedPreferences });
     } catch (error) {
+      console.error("Error updating preferences:", error);
       res.status(400).json({ message: "Invalid data provided" });
     }
   });
@@ -125,15 +130,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const userId = 1;
     
     try {
-      const bookmarkSchema = insertBookmarkSchema.extend({
-        userId: z.literal(userId)
-      });
+      // Create a schema that omits userId
+      const bookmarkSchema = insertBookmarkSchema.omit({ userId: true });
       
+      // Validate the data from the request
       const validatedData = bookmarkSchema.parse(req.body);
       
-      const newBookmark = await storage.createBookmark(validatedData);
+      // Add the userId and current date
+      const fullBookmarkData = {
+        ...validatedData,
+        userId,
+        createdAt: new Date().toISOString()
+      };
+      
+      // Create the bookmark
+      const newBookmark = await storage.createBookmark(fullBookmarkData);
       res.status(201).json({ bookmark: newBookmark });
     } catch (error) {
+      console.error("Error creating bookmark:", error);
       res.status(400).json({ message: "Invalid data provided" });
     }
   });
