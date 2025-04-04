@@ -91,14 +91,9 @@ export default function SettingsPanel({
   
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md" dir="rtl">
+      <DialogContent className="sm:max-w-md overflow-hidden" dir="rtl">
         <DialogHeader>
           <DialogTitle className="text-primary dark:text-white text-lg font-medium">الإعدادات</DialogTitle>
-          <DialogClose className="absolute right-4 top-4 text-gray-500" asChild>
-            <Button variant="ghost" size="icon">
-              <X size={18} />
-            </Button>
-          </DialogClose>
         </DialogHeader>
         
         <div className="settings-options space-y-6 py-4">
