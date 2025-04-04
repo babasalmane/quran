@@ -2,7 +2,7 @@ import { X, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { fetchBookmarks, deleteBookmark, type SuraMetadata, type Bookmark as BookmarkType } from "@/lib/quranAPI";
 import { queryClient } from "@/lib/queryClient";
 
@@ -22,6 +22,8 @@ export default function NavigationDrawer({
   currentSura
 }: NavigationDrawerProps) {
   const [bookmarks, setBookmarks] = useState<BookmarkType[]>([]);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const currentSuraRef = useRef<HTMLDivElement>(null);
   
   // Fetch bookmarks when drawer opens
   useEffect(() => {
@@ -36,8 +38,23 @@ export default function NavigationDrawer({
       };
       
       getBookmarks();
+      
+      // Scroll to current surah with a slight delay to allow the drawer to open
+      setTimeout(() => {
+        if (currentSuraRef.current && scrollAreaRef.current) {
+          const scrollArea = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+          if (scrollArea) {
+            const suraElement = currentSuraRef.current;
+            const containerTop = scrollArea.getBoundingClientRect().top;
+            const elementTop = suraElement.getBoundingClientRect().top;
+            const offsetTop = elementTop - containerTop;
+            
+            scrollArea.scrollTop = offsetTop - 80; // Scroll a bit above the element
+          }
+        }
+      }, 100);
     }
-  }, [isOpen]);
+  }, [isOpen, currentSura]);
   
   const handleSuraSelect = (suraNumber: number) => {
     onSuraSelect(suraNumber);
@@ -80,11 +97,12 @@ export default function NavigationDrawer({
         </Button>
       </div>
       
-      <ScrollArea className="flex-grow overflow-y-auto">
+      <ScrollArea ref={scrollAreaRef} className="flex-grow overflow-y-auto">
         <div className="p-2">
           {suras.map((sura) => (
             <div 
               key={sura.number}
+              ref={currentSura === sura.number ? currentSuraRef : undefined}
               className={`p-3 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer ${
                 currentSura === sura.number ? "bg-gray-100 dark:bg-gray-800" : ""
               }`}
