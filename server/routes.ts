@@ -3,32 +3,11 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
 import { insertUserPreferencesSchema, insertBookmarkSchema } from "@shared/schema";
-import { getQuranMetadata } from "@shared/quranData";
+import { getQuranMetadata, QuranData } from "@shared/quranData";
 
-// Simulated Quran data
-const quranData = {
-  suras: getQuranMetadata().map(sura => {
-    // Create dummy ayahs for each sura
-    const ayahs = Array.from({ length: sura.totalAyahs }, (_, i) => ({
-      number: sura.number * 1000 + i + 1, // Global ayah number
-      numberInSurah: i + 1, // Ayah number within sura
-      text: `هذا نص تجريبي للآية ${i + 1} من سورة ${sura.name}`, // Arabic placeholder text
-      translation: `This is a placeholder text for ayah ${i + 1} of Surah ${sura.englishName}`,
-      juz: Math.ceil((i + 1) / 20), // Dummy juz value
-      sajda: false // No sajda in placeholder
-    }));
-    
-    return {
-      number: sura.number,
-      name: sura.name,
-      englishName: sura.englishName,
-      englishNameTranslation: sura.englishName, // Using englishName as translation for simplicity
-      revelationType: sura.number <= 28 ? "Meccan" : "Medinan", // Simple logic for demonstration
-      ayahs,
-      totalAyahs: sura.totalAyahs
-    };
-  })
-};
+// Use the actual Quran data imported from shared/quranData.ts
+// which was generated from the harakat file
+import { quranData } from "@shared/quranData";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // put application routes here
