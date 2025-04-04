@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <title>القرآن الكريم - Quran Reader</title>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+      @font-face {
+        font-family: 'Amiri';
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url(https://fonts.gstatic.com/s/amiri/v25/J7aRnpd8CGxBHpUrtLMA.woff2) format('woff2');
+        unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0898-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC;
+      }
+      
+      @font-face {
+        font-family: 'Amiri';
+        font-style: normal;
+        font-weight: 700;
+        font-display: swap;
+        src: url(https://fonts.gstatic.com/s/amiri/v25/J7acnpd8CGxBHp2VkaY6zp5y.woff2) format('woff2');
+        unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0898-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC;
+      }
+      
+      /* Custom scrollbar */
+      .quran-content::-webkit-scrollbar {
+        width: 6px;
+      }
+      
+      .quran-content::-webkit-scrollbar-track {
+        background: rgba(0,0,0,0.05);
+      }
+      
+      .quran-content::-webkit-scrollbar-thumb {
+        background-color: rgba(46,125,50,0.3);
+        border-radius: 3px;
+      }
+      
+      /* Dark mode adjustments */
+      .dark .quran-content::-webkit-scrollbar-thumb {
+        background-color: rgba(46,125,50,0.5);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

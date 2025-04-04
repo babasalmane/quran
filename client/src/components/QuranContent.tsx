@@ -1,0 +1,189 @@
+import { useRef, useEffect, useState } from "react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { MoreVertical, Book } from "lucide-react";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { useToast } from "@/hooks/use-toast";
+import { type Sura, type Ayah, createBookmark } from "@/lib/quranAPI";
+import { queryClient } from "@/lib/queryClient";
+import { toArabicNumeral } from "@shared/quranData";
+
+interface QuranContentProps {
+  sura: Sura;
+  currentAyah: number;
+  setCurrentAyah: (ayahNumber: number) => void;
+  isAutoScrolling: boolean;
+  fontSize: number;
+  darkMode: boolean;
+  scrollRef: React.RefObject<HTMLDivElement>;
+}
+
+export default function QuranContent({
+  sura,
+  currentAyah,
+  setCurrentAyah,
+  isAutoScrolling,
+  fontSize,
+  darkMode,
+  scrollRef
+}: QuranContentProps) {
+  const verseRefs = useRef<Record<number, HTMLDivElement | null>>({});
+  const { toast } = useToast();
+  const [scrollIndicatorStyle, setScrollIndicatorStyle] = useState({ height: '15%', top: '0%' });
+  
+  // Font size classes based on fontSize value (1-5)
+  const fontSizeClasses = [
+    "text-lg", // 1
+    "text-xl", // 2
+    "text-2xl", // 3 (default)
+    "text-3xl", // 4
+    "text-4xl", // 5
+  ];
+  
+  useEffect(() => {
+    // Scroll to current ayah when it changes
+    if (verseRefs.current[currentAyah]) {
+      verseRefs.current[currentAyah]?.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    }
+  }, [currentAyah]);
+  
+  useEffect(() => {
+    const updateScrollIndicator = () => {
+      if (!scrollRef.current) return;
+      
+      const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+      const scrollPercentage = (scrollTop / (scrollHeight - clientHeight)) * 100;
+      const indicatorHeight = Math.min(30, Math.max(10, 100 / (scrollHeight / clientHeight)));
+      
+      setScrollIndicatorStyle({
+        height: `${indicatorHeight}%`,
+        top: `${(scrollPercentage * (100 - indicatorHeight)) / 100}%`
+      });
+    };
+    
+    const scrollElement = scrollRef.current;
+    if (scrollElement) {
+      scrollElement.addEventListener('scroll', updateScrollIndicator);
+      // Initialize
+      updateScrollIndicator();
+      
+      return () => {
+        scrollElement.removeEventListener('scroll', updateScrollIndicator);
+      };
+    }
+  }, [scrollRef]);
+  
+  const handleVerseClick = (ayahNumber: number) => {
+    if (!isAutoScrolling) {
+      setCurrentAyah(ayahNumber);
+    }
+  };
+  
+  const handleAddBookmark = async (ayahNumber: number) => {
+    try {
+      await createBookmark({
+        suraId: sura.number,
+        ayahId: ayahNumber
+      });
+      
+      toast({
+        title: "تمت إضافة الإشارة المرجعية",
+        description: `تمت إضافة آية ${ayahNumber} من سورة ${sura.name} إلى المفضلة`,
+      });
+      
+      queryClient.invalidateQueries({ queryKey: ['/api/bookmarks'] });
+    } catch (error) {
+      toast({
+        title: "خطأ",
+        description: "فشل في إضافة الإشارة المرجعية",
+        variant: "destructive"
+      });
+    }
+  };
+  
+  const handleCopyVerse = (ayah: Ayah) => {
+    navigator.clipboard.writeText(`${ayah.text}\n\n${ayah.translation}\n\n(${sura.name}, ${ayah.numberInSurah})`);
+    toast({
+      title: "تم النسخ",
+      description: "تم نسخ الآية إلى الحافظة"
+    });
+  };
+  
+  return (
+    <main 
+      className="relative h-[calc(100vh-128px)] overflow-y-auto p-4 transition-colors duration-300"
+      ref={scrollRef}
+      dir="rtl"
+    >
+      <div 
+        className="scroll-indicator absolute right-0 w-1 bg-primary transition-all duration-300"
+        style={{ height: scrollIndicatorStyle.height, top: scrollIndicatorStyle.top }}
+      />
+      
+      <div className="sura-header mb-6 text-center">
+        <div className="sura-bismillah mb-4">
+          <p className="font-[Amiri] text-2xl dark:text-white">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p>
+        </div>
+        <h2 className="font-[Amiri] text-2xl font-bold text-primary dark:text-white mb-1">
+          سورة {sura.name}
+        </h2>
+        <p className="text-gray-600 dark:text-gray-400">
+          {sura.englishName} ({sura.englishNameTranslation}) - {sura.totalAyahs} Verses
+        </p>
+      </div>
+      
+      <div className="verses-container max-w-3xl mx-auto">
+        {sura.ayahs.map((ayah) => (
+          <div 
+            key={ayah.numberInSurah}
+            id={`verse-${ayah.numberInSurah}`}
+            ref={el => verseRefs.current[ayah.numberInSurah] = el}
+            className={`verse mb-6 p-2 rounded-md transition-colors ${
+              currentAyah === ayah.numberInSurah ? "bg-gray-50 dark:bg-gray-800" : ""
+            } hover:bg-gray-50 dark:hover:bg-gray-800`}
+            onClick={() => handleVerseClick(ayah.numberInSurah)}
+          >
+            <div className="flex justify-between items-center mb-2">
+              <span className="verse-number bg-primary text-white w-8 h-8 flex items-center justify-center rounded-full text-sm">
+                {toArabicNumeral(ayah.numberInSurah)}
+              </span>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="text-gray-400 hover:text-primary" onClick={e => e.stopPropagation()}>
+                    <MoreVertical size={20} />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => handleAddBookmark(ayah.numberInSurah)}>
+                    إضافة إشارة مرجعية
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleCopyVerse(ayah)}>
+                    نسخ الآية
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            
+            <p className={`font-[Amiri] ${fontSizeClasses[fontSize - 1]} leading-loose mb-2 dark:text-white`}>
+              {ayah.text}
+            </p>
+            <p className="translation text-gray-600 dark:text-gray-400 text-base">
+              {ayah.translation}
+            </p>
+          </div>
+        ))}
+        
+        <div className="end-of-sura text-center my-12">
+          <div className="inline-block mx-auto bg-amber-100 dark:bg-amber-900/30 p-2 rounded-md">
+            <Book className="mx-auto text-primary mb-1" size={24} />
+            <p className="text-primary text-sm font-medium">نهاية السورة</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}
