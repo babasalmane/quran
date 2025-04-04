@@ -3,10 +3,10 @@ import {
   userPreferences, type UserPreferences, type InsertUserPreferences,
   bookmarks, type Bookmark, type InsertBookmark 
 } from "@shared/schema";
+import { db } from "./db";
+import { eq, and } from "drizzle-orm";
 
-// modify the interface with any CRUD methods
-// you might need
-
+// The IStorage interface remains the same
 export interface IStorage {
   // User methods
   getUser(id: number): Promise<User | undefined>;
@@ -25,70 +25,60 @@ export interface IStorage {
   deleteBookmark(id: number): Promise<boolean>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private userPreferences: Map<number, UserPreferences>;
-  private bookmarks: Map<number, Bookmark>;
-  private currentUserId: number;
-  private currentPrefId: number;
-  private currentBookmarkId: number;
-
+// Implementation using the PostgreSQL database
+export class DatabaseStorage implements IStorage {
   constructor() {
-    this.users = new Map();
-    this.userPreferences = new Map();
-    this.bookmarks = new Map();
-    this.currentUserId = 1;
-    this.currentPrefId = 1;
-    this.currentBookmarkId = 1;
+    // Create a default user and preferences if they don't exist
+    this.initializeDefaultUser().catch(err => 
+      console.error("Failed to create default user:", err)
+    );
+  }
+
+  private async initializeDefaultUser() {
+    // Check if the default user exists
+    const existingUser = await this.getUserByUsername("guest");
     
-    // Create a default user
-    this.createUser({ username: "guest", password: "guest" })
-      .then(user => {
-        // Create default preferences for the user
-        this.createUserPreferences({
-          userId: user.id,
-          currentSura: 1,
-          currentAyah: 1,
-          fontSize: 3,
-          scrollSpeed: 5,
-          darkMode: false
-        });
-      })
-      .catch(err => console.error("Failed to create default user:", err));
+    if (!existingUser) {
+      // Create the default user
+      const user = await this.createUser({ username: "guest", password: "guest" });
+      
+      // Create default preferences
+      await this.createUserPreferences({
+        userId: user.id,
+        currentSura: 1,
+        currentAyah: 1,
+        fontSize: 3,
+        scrollSpeed: 5,
+        darkMode: false
+      });
+    }
   }
 
   // User methods
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const result = await db.select().from(users).where(eq(users.id, id));
+    return result.length > 0 ? result[0] : undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const result = await db.select().from(users).where(eq(users.username, username));
+    return result.length > 0 ? result[0] : undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentUserId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    
-    // We'll create default preferences in the constructor for the first user
-    return user;
+    const result = await db.insert(users).values(insertUser).returning();
+    return result[0];
   }
 
   // User preferences methods
   async getUserPreferences(userId: number): Promise<UserPreferences | undefined> {
-    const allPrefs = Array.from(this.userPreferences.values());
-    return allPrefs.find(pref => pref.userId === userId);
+    const result = await db.select().from(userPreferences).where(eq(userPreferences.userId, userId));
+    return result.length > 0 ? result[0] : undefined;
   }
 
   async createUserPreferences(prefs: InsertUserPreferences): Promise<UserPreferences> {
-    const id = this.currentPrefId++;
-    
-    // Ensure all required fields are present
-    const newPrefs: UserPreferences = { 
-      id,
+    // Ensure all required fields are present with defaults if not provided
+    const prefsWithDefaults = {
       userId: prefs.userId,
       currentSura: prefs.currentSura ?? 1,
       currentAyah: prefs.currentAyah ?? 1,
@@ -97,64 +87,53 @@ export class MemStorage implements IStorage {
       darkMode: prefs.darkMode ?? false
     };
     
-    this.userPreferences.set(id, newPrefs);
-    return newPrefs;
+    const result = await db.insert(userPreferences).values(prefsWithDefaults).returning();
+    return result[0];
   }
 
   async updateUserPreferences(userId: number, updates: Partial<InsertUserPreferences>): Promise<UserPreferences | undefined> {
-    const allPrefs = Array.from(this.userPreferences.values());
-    const prefToUpdate = allPrefs.find(pref => pref.userId === userId);
+    // First, get the existing preferences
+    const existingPrefs = await this.getUserPreferences(userId);
     
-    if (!prefToUpdate) return undefined;
+    if (!existingPrefs) return undefined;
     
-    // Ensure all required fields are present
-    const updatedPrefs: UserPreferences = { 
-      ...prefToUpdate, 
-      ...updates,
-      // Make sure required fields are not undefined
-      userId: userId,
-      currentSura: updates.currentSura ?? prefToUpdate.currentSura,
-      currentAyah: updates.currentAyah ?? prefToUpdate.currentAyah,
-      fontSize: updates.fontSize ?? prefToUpdate.fontSize,
-      scrollSpeed: updates.scrollSpeed ?? prefToUpdate.scrollSpeed,
-      darkMode: updates.darkMode ?? prefToUpdate.darkMode
-    };
+    // Update the preferences with new values
+    const result = await db
+      .update(userPreferences)
+      .set(updates)
+      .where(eq(userPreferences.userId, userId))
+      .returning();
     
-    this.userPreferences.set(prefToUpdate.id, updatedPrefs);
-    return updatedPrefs;
+    return result.length > 0 ? result[0] : undefined;
   }
 
   // Bookmark methods
   async getBookmarks(userId: number): Promise<Bookmark[]> {
-    const allBookmarks = Array.from(this.bookmarks.values());
-    return allBookmarks.filter(bookmark => bookmark.userId === userId);
+    const result = await db.select().from(bookmarks).where(eq(bookmarks.userId, userId));
+    return result;
   }
 
   async getBookmark(id: number): Promise<Bookmark | undefined> {
-    return this.bookmarks.get(id);
+    const result = await db.select().from(bookmarks).where(eq(bookmarks.id, id));
+    return result.length > 0 ? result[0] : undefined;
   }
 
   async createBookmark(bookmark: InsertBookmark): Promise<Bookmark> {
-    const id = this.currentBookmarkId++;
-    
-    // Construct the bookmark with all required fields
-    const newBookmark = {
-      id,
-      userId: bookmark.userId,
-      suraId: bookmark.suraId,
-      ayahId: bookmark.ayahId,
-      // For note field: if undefined or null, set to undefined (optional field)
-      note: bookmark.note === undefined ? undefined : bookmark.note,
+    // Ensure required fields have defaults
+    const bookmarkWithDefaults = {
+      ...bookmark,
       createdAt: bookmark.createdAt ?? new Date().toISOString()
-    } as Bookmark; // Use type assertion to cast to Bookmark type
+    };
     
-    this.bookmarks.set(id, newBookmark);
-    return newBookmark;
+    const result = await db.insert(bookmarks).values(bookmarkWithDefaults).returning();
+    return result[0];
   }
 
   async deleteBookmark(id: number): Promise<boolean> {
-    return this.bookmarks.delete(id);
+    const result = await db.delete(bookmarks).where(eq(bookmarks.id, id)).returning();
+    return result.length > 0;
   }
 }
 
-export const storage = new MemStorage();
+// Export a singleton instance of the database storage
+export const storage = new DatabaseStorage();
