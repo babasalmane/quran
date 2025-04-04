@@ -109,8 +109,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const userId = 1;
     
     try {
-      // Create a schema that omits userId
-      const bookmarkSchema = insertBookmarkSchema.omit({ userId: true });
+      // Create a schema that omits userId and createdAt since we'll add those ourselves
+      const bookmarkSchema = insertBookmarkSchema.omit({ 
+        userId: true,
+        createdAt: true
+      });
       
       // Validate the data from the request
       const validatedData = bookmarkSchema.parse(req.body);
