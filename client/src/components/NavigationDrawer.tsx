@@ -5,7 +5,6 @@ import { Separator } from "@/components/ui/separator";
 import { useEffect, useState } from "react";
 import { fetchBookmarks, deleteBookmark, type SuraMetadata, type Bookmark as BookmarkType } from "@/lib/quranAPI";
 import { queryClient } from "@/lib/queryClient";
-import { toArabicNumeral } from "@shared/quranData";
 
 interface NavigationDrawerProps {
   isOpen: boolean;
@@ -95,13 +94,10 @@ export default function NavigationDrawer({
                 <span className="font-[Amiri] text-base font-medium dark:text-white">
                   {sura.name}
                 </span>
-                <span className="text-gray-600 dark:text-gray-400 text-sm block">
-                  {sura.englishName}
-                </span>
               </div>
               <div className="flex items-center">
                 <span className="text-sm text-gray-500 dark:text-gray-400">
-                  {toArabicNumeral(sura.totalAyahs)} آيات
+                  {sura.totalAyahs} آية
                 </span>
               </div>
             </div>
@@ -125,7 +121,7 @@ export default function NavigationDrawer({
               >
                 <div>
                   <span className="font-[Amiri] text-sm dark:text-white">
-                    {getSuraName(bookmark.suraId)}، آية {toArabicNumeral(bookmark.ayahId)}
+                    {getSuraName(bookmark.suraId)}، آية {bookmark.ayahId}
                   </span>
                   {bookmark.note && (
                     <span className="text-gray-600 dark:text-gray-400 text-xs block">

@@ -5,7 +5,6 @@ import { MoreVertical, Book } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { type Sura, type Ayah } from "@/lib/quranAPI";
-import { toArabicNumeral } from "@shared/quranData";
 
 interface QuranContentProps {
   sura: Sura;
@@ -81,8 +80,6 @@ export default function QuranContent({
     }
   };
   
-
-  
   const handleCopyVerse = (ayah: Ayah) => {
     navigator.clipboard.writeText(`${ayah.text}\n\n(${sura.name}, ${ayah.numberInSurah})`);
     toast({
@@ -110,7 +107,7 @@ export default function QuranContent({
           سورة {sura.name}
         </h2>
         <p className="text-gray-600 dark:text-gray-400">
-          {sura.englishName} ({sura.englishNameTranslation}) - {sura.totalAyahs} Verses
+          {sura.totalAyahs} آية
         </p>
       </div>
       

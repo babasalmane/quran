@@ -10,7 +10,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { SearchIcon, X, Search, BookOpen } from "lucide-react";
 import { searchQuran, type SearchResult } from "@/lib/quranAPI";
-import { toArabicNumeral } from "@shared/quranData";
 
 interface SearchOverlayProps {
   isOpen: boolean;
@@ -110,18 +109,12 @@ export default function SearchOverlay({
                 >
                   <div className="flex justify-between items-center mb-1">
                     <div className="font-[Amiri] font-medium dark:text-white">
-                      {result.sura.name} - آية {toArabicNumeral(result.ayah.numberInSurah)}
-                    </div>
-                    <div className="text-gray-500 text-sm">
-                      {result.sura.englishName}
+                      {result.sura.name} - آية {result.ayah.numberInSurah}
                     </div>
                   </div>
                   
-                  <p className="font-[Amiri] text-lg mb-1 line-clamp-1 dark:text-white">
+                  <p className="font-[Amiri] text-lg line-clamp-2 dark:text-white">
                     {result.ayah.text}
-                  </p>
-                  <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-2">
-                    {result.ayah.translation}
                   </p>
                 </div>
               ))}
