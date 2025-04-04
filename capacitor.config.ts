@@ -1,9 +1,10 @@
+
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.quranreader.app',
   appName: 'Quran Reader',
-  webDir: 'client/dist',
+  webDir: 'dist/public',
   server: {
     androidScheme: 'https'
   },
